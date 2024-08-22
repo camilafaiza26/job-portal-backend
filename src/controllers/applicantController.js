@@ -61,7 +61,7 @@ exports.create = async (req, res) => {
                 await ApplicantSkill.bulkCreate(applicantSkills, { transaction });
             }
             await transaction.commit();
-            res.status(201).send({
+            res.status(200).send({
                 status: 'success',
                 data: newApplicant
             });

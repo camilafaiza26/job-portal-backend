@@ -15,9 +15,10 @@ exports.register = async (req, res) => {
         });
         
        
-        res.status(201).send({
+        res.status(200).send({
             status: 'success',
             code: 'USER_REGISTERED',
+            message: 'Registration Successfully',
             data: {               
                 email: user.email,
                 role: user.role,
@@ -43,7 +44,7 @@ exports.login = async (req, res) => {
             return res.status(404).send({
                 status: 'error',
                 code: 'USER_NOT_FOUND',
-                message: 'User was not found'
+                message: 'User not found. Please register first'
             });
         }
 
@@ -55,7 +56,9 @@ exports.login = async (req, res) => {
             const token = generateToken(user);
             res.cookie('token', token, { 
                 httpOnly: true,                
-                maxAge: 24 * 60 * 60 * 1000 // 1 day
+                maxAge: 24 * 60 * 60 * 1000, 
+                sameSite: 'None', 
+                secure: true   
             });
 
             res.status(200).send({
@@ -68,10 +71,10 @@ exports.login = async (req, res) => {
                 }
             });
         } else {
-            res.status(401).send({
+            res.status(400).send({
                 status: 'error',
                 code: 'CREDENTIAL_NOT_VALID',
-                message: 'Credential not valid'
+                message: 'User Credential not valid, please try again'
             });
         }
     } catch (err) {

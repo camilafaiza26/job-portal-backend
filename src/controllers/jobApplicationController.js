@@ -12,7 +12,7 @@ const Position = require('../models/positions');
 
 exports.create = async (req, res) => {
     const {nik}  = req.query;
-    const { position_id, relocation_availability, expected_salary, applicants_skills } = req.body;
+    const { position_id, relocation_availability, expected_salary } = req.body;
 
     try {
         const jobApplication = await JobApplication.create({
@@ -22,7 +22,7 @@ exports.create = async (req, res) => {
             expected_salary
         });
 
-        res.status(201).json({
+        res.status(200).json({
             status: 'success',
             message: 'Job application created successfully',
             data: jobApplication
@@ -38,7 +38,7 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
     const { id_job_application } = req.params;
-    const { position_id, relocation_availability, expected_salary, applicants_skills } = req.body;
+    const { position_id, relocation_availability, expected_salary } = req.body;
 
     try {
         const jobApplication = await JobApplication.findByPk(id_job_application);
@@ -71,6 +71,7 @@ exports.delete = async (req, res) => {
 
     try {
         const jobApplication = await JobApplication.findByPk(id_job_application);
+        
         if (!jobApplication) {
             return res.status(404).json({
                 status: 'error',
@@ -78,13 +79,18 @@ exports.delete = async (req, res) => {
             });
         }
 
+        await jobApplication.destroy();
+
         res.status(200).json({
             status: 'success',
             message: 'Job application deleted successfully'
         });
     } catch (error) {
         logger.error('Error deleting job application:', error);
-        res.status(500).json({ status: 'error', message: 'An error occurred while deleting job application' });
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'An error occurred while deleting the job application' 
+        });
     }
 };
 
@@ -94,6 +100,7 @@ exports.getAll = async (req, res) => {
     try {
         const jobApplications = await JobApplication.findAll({
             include: [
+                Position,
                 {
                     model: Applicant,
                     as: 'applicant',
@@ -101,8 +108,8 @@ exports.getAll = async (req, res) => {
                         {
                             model: User,
                             as: 'user'
-                        },
-                        'trainings',
+                        },                      
+                        'trainings',                    
                         'experiences',
                         'educations',
                         {
